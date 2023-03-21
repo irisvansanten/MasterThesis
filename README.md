@@ -21,33 +21,14 @@ The repository contains the following files:
 
 Folders/Files | Description
 --- | ---
-Data_generation | Folder with scripts for data generation
-/MAIN_data_generation | Script to generate the data for the simulation study
-/FUN_dataset_simulation | Script with function for dataset simulation
-MILC_application | Folder with script for MILC application
-/MAIN_MILC | Script to apply MILC on the simulate data sets
-/FUN_LC | Script with function for LC model estimation
-Statistical_analysis | Folder with scripts for the statistical analysis
-/MAIN_StatAn | Scripts to perform statistical analysis
-/FUN_Performance_Measures | Script with function for the performance measures
-/Output_generation | Folder with scripts for the output given in the thesis report
-
-Below are the steps given to reproduce this simulation study:
-## Step 1: Data generation 
-Folder: Data_generation
-1. The working directory should be set in the right folder.
-
-## Step 2: MILC application
-Folder: MILC application
-1. Move the datafile generated in the previous step in this folder.  
-
-## Step 3: Statistical Analysis
-Folder: Statistical Analysis
-1. Move the datafiles generated in the previous step in this folder.
-
-## Step 4: Output generation 
-Folder: Output_generation
-1. Move the datafiles fenerated in the previous step in this folder.
+MILC_MAR | Script that performs simulation study
+FUN_MILC_MAR | Script that contains main functions for simulation study
+FUN_help_MILC | Script that contains help functions for simulation study
+FUN_results | Script to present the results
+FUN_rel_strength_MAR | Script to calculate the strength of MAR via Cramer's V
+measurement_error | Script with population containing different meausurement error proportions
+Tables | Folder in which the results in tables are presented
+Figures | Folder in which the results in figures are presented
 
 # Contact
 For any questions. 
