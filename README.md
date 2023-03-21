@@ -27,8 +27,10 @@ FUN_help_MILC | Script that contains help functions for simulation study
 FUN_results | Script to present the results
 FUN_rel_strength_MAR | Script to calculate the strength of MAR via Cramer's V
 measurement_error | Script with population containing different meausurement error proportions
+vb_MAR | script with example on how to perform MAR
 Tables | Folder in which the results in tables are presented
 Figures | Folder in which the results in figures are presented
+
 
 # Contact
 For any questions. 
