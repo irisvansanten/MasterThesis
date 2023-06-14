@@ -8,11 +8,11 @@ library(dplyr)
 library(tidyr)
 library(mice)
 # set parameters
-nboot = 5
+nboot = 10
 ncat = 7
 napproaches = 3
-data_sets = c("gas","electricity")
-#data_sets = c("gas")
+#data_sets = c("electricity", "gas")
+data_sets = c("gas")
 #data_sets = c("electricity")
 pms = c("lv", "bias", "RMSE" )
 ### Data preparation ###
@@ -72,7 +72,7 @@ apply_approach = function(data, approach){
   return(list("cleaned_data" = cleaned_data, "y" = y, "n" = n))
 }
 
-apply_MILC = function(cleaned_data, data_type, y, n, nboot, ncat){
+apply_MILC = function(cleaned_data, y, n, nboot, ncat){
   res = matrix(data = NA, nrow = n, ncol = nboot)  # storing imputed values
   res = as.data.frame(res)
   names(res)= c(1:nboot)
@@ -82,7 +82,7 @@ apply_MILC = function(cleaned_data, data_type, y, n, nboot, ncat){
   starttime=Sys.time()
   for(boot in 1:nboot){
     cat("boot =",boot,"\n\n")
-    set.seed(boot)
+    set.seed(boot+55)
     Ready = TRUE
     while(Ready){
       Bsample = cleaned_data[sample(1:n, n, replace = TRUE), ]
@@ -107,10 +107,6 @@ apply_MILC = function(cleaned_data, data_type, y, n, nboot, ncat){
                                    data = Bsample, nclass = ncat, verbose = T, 
                                    probs.start = prob.start.new, maxiter = 10000, calc.se = FALSE),
                       error = function(e) NULL)
-      probs = LCAr$probs
-      print(probs)
-      write.csv2(probs, file=sprintf("probs_%s_approach%s_boot%s_test.csv", data_type, approach, boot), quote=FALSE, row.names=F)
-      
       ppd = tryCatch(expr = poLCA.posterior(LCAr, y = y), error = function(e) NA)
       res[ ,boot] = tryCatch(expr = rmulti(ppd), error = function(e) NA)
       for (cat in 1:ncat){
@@ -132,7 +128,7 @@ output_MILC = function(theta_LC, var_LC, theta, data_type, approach, nboot, ncat
   ### Obtain  results ###
   # 1) LV estimation
   p_mean = apply(theta_LC, MARGIN = 2, FUN = mean) # pooled mean 
-  write.csv2(p_mean, file=sprintf("mean_%s_approach%s_test.csv", data_type, approach), quote=FALSE, row.names=F)
+  write.csv2(p_mean, file=sprintf("mean_%s_approach%s_os.csv", data_type, approach), quote=FALSE, row.names=F)
   # 2) Bias estimation
   bias = data.frame(t(theta_LC))
   theta_df = data.frame(theta)
@@ -140,7 +136,7 @@ output_MILC = function(theta_LC, var_LC, theta, data_type, approach, nboot, ncat
     bias[,col] = bias[,col] - theta_df
   }
   p_bias = apply(bias, MARGIN = 1, FUN = mean) # pooled bias
-  write.csv2(p_bias, file=sprintf("bias_%s_approach%s_test.csv", data_type, approach), quote=FALSE, row.names=F)
+  write.csv2(p_bias, file=sprintf("bias_%s_approach%s_os.csv", data_type, approach), quote=FALSE, row.names=F)
   # 3) Variance
   theta_LC_df = data.frame(t(theta_LC))
   V_within = apply( var_LC/nboot, MARGIN = 2, FUN = mean) 
@@ -150,7 +146,7 @@ output_MILC = function(theta_LC, var_LC, theta, data_type, approach, nboot, ncat
   p_MSE = p_VAR + p_bias^2
   # 5) RMSE
   p_RMSE = sqrt(p_MSE)
-  write.csv2(p_RMSE, file=sprintf("RMSE_%s_approach%s_test.csv", data_type, approach), quote=FALSE, row.names=F)
+  write.csv2(p_RMSE, file=sprintf("RMSE_%s_approach%s_os.csv", data_type, approach), quote=FALSE, row.names=F)
 
   ### To plot results ###
   plot.data = data.frame(category = rep(1:ncat),
@@ -158,7 +154,7 @@ output_MILC = function(theta_LC, var_LC, theta, data_type, approach, nboot, ncat
                          bias = p_bias,
                          RMSE = p_RMSE,
                          sd = sqrt(p_VAR)*1.96)
-  write.csv2(plot.data, file=sprintf("plot_table_%s_approach%s_test.csv", data_type, approach), quote=FALSE, row.names=F)
+  write.csv2(plot.data, file=sprintf("plot_table_%s_approach%s_os.csv", data_type, approach), quote=FALSE, row.names=F)
 }
 
 plot_MILC = function(pms, data_type, approach, theta, ncat){
@@ -184,10 +180,11 @@ plot_MILC = function(pms, data_type, approach, theta, ncat){
         y_lim = c(-0.2, 0.6)
       }
     }
-    table_pm = read.csv(file=sprintf("plot_table_%s_approach%s_test.csv", data_type, approach ), header=T, sep=";")
+    table_pm = read.csv(file=sprintf("plot_table_%s_approach%s_os.csv", data_type, approach ), header=T, sep=";")
     table_pm[1:5] = lapply(table_pm[1:5], gsub, pattern = ",", replacement = ".")
     table_pm[] = as.numeric(as.matrix(table_pm))
     if(pm == 1){
+      print(table_pm)
       ggplot(data = table_pm, aes(x =category, y = table_pm[,1+pm], ymax = lv+sd, ymin = lv-sd, colour ="red")) +
         geom_point(aes(x =  1:ncat, y = theta), col = 'black', shape = 17, size = 1.5)+
         geom_errorbar(width = 0.2, position = position_dodge(0.03)) +
@@ -199,7 +196,7 @@ plot_MILC = function(pms, data_type, approach, theta, ncat){
         ylab(sprintf("Estimated %s", pms[pm])) +
         xlab("")
 
-      ggsave(sprintf("plot_%s_%s_approach%s_test.pdf", pms[pm], data_type, approach),width = 5, height = 5)
+      ggsave(sprintf("plot_%s_%s_approach%s_os.pdf", pms[pm], data_type, approach),width = 5, height = 5)
     }else{
       ggplot(data = table_pm, aes(x =category, y = table_pm[,1+pm], colour ="red")) +
         geom_point() +
@@ -210,13 +207,10 @@ plot_MILC = function(pms, data_type, approach, theta, ncat){
         scale_x_continuous(breaks = c(1:ncat), labels =new_x ) +
         ylab(sprintf("Estimated %s", pms[pm])) +
         xlab("")
-      ggsave(sprintf("plot_%s_%s_approach%s_test.pdf", pms[pm], data_type, approach),width = 5, height = 5)
+      ggsave(sprintf("plot_%s_%s_approach%s_os.pdf", pms[pm], data_type, approach),width = 5, height = 5)
    }
   }
 }
-
-
-
 
 ### Perform MILC ###
 for(dat in data_sets){
@@ -227,24 +221,24 @@ for(dat in data_sets){
   }
   print(dat)
   perc_mv =(colMeans(is.na(data_set)))*100
-  write.csv2(perc_mv, file=sprintf("perc_mv_%s_test.csv", dat), quote=FALSE, row.names=F)
+  write.csv2(perc_mv, file=sprintf("perc_mv_%s_os.csv", dat), quote=FALSE, row.names=F)
   n_data = nrow(data_set)
-  write.csv2(n_data, file=sprintf("n_data_%s_test.csv", dat), quote=FALSE, row.names=F)
+  write.csv2(n_data, file=sprintf("n_data_%s_os.csv", dat), quote=FALSE, row.names=F)
   
   theta = matrix(data = NA, nrow = ncat, ncol = 1)
   for(cat in 1:ncat){
     theta[cat] = table(data_set$Definitief8)[cat] 
   }
   theta = theta/sum(theta)
-  write.csv2(theta, file=sprintf("theta_%s_test.csv", dat), quote=FALSE, row.names=F)
+  write.csv2(theta, file=sprintf("theta_%s_os.csv", dat), quote=FALSE, row.names=F)
   for(approach in 1:napproaches){
     print(approach)
     results_approach = apply_approach(data_set, approach)
     cleaned_data = results_approach$cleaned_data
     y = results_approach$y
     n = results_approach$n
-    write.csv2(n, file=sprintf("n_approach%s_%s_test.csv", approach, dat), quote=FALSE, row.names=F)
-    results_MILC = apply_MILC(cleaned_data, dat, y, n, nboot, ncat)
+    write.csv2(n, file=sprintf("n_approach%s_%s_os.csv", approach, dat), quote=FALSE, row.names=F)
+    results_MILC = apply_MILC(cleaned_data, y, n, nboot, ncat)
     theta_LC = results_MILC$theta_LC
     var_LC = results_MILC$var_LC
     output = output_MILC(theta_LC, var_LC, theta, dat, approach, nboot, ncat)
@@ -252,19 +246,3 @@ for(dat in data_sets){
   }
 }
 
-
-# for(dat in data_sets){
-#   if(dat == "electricity"){
-#     data_set = data[data$energiedrager == "E",]
-#   }else if(dat == "gas"){
-#     data_set = data[data$energiedrager == "G",]
-#   }
-#   theta = matrix(data = NA, nrow = ncat, ncol = 1)
-#   for(cat in 1:ncat){
-#     theta[cat] = table(data_set$Definitief8)[cat] 
-#   }
-#   theta = theta/sum(theta)
-#   for(approach in 1:napproaches){
-#     result = plot_MILC(pms, dat, approach, theta, ncat)
-#   }
-# }
