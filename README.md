@@ -10,7 +10,7 @@ This repository provides all information and necessary files to replicate the si
 # Software requirements
 The whole thesis is coded with R. 
 
-# Instructions
+Description
 ## Simulation Study
 The simulation study was coded in one script, MAIN_MILC.R, with support of another script, FUN_help, that contains additional functions. Another two script were coded to obtain convergences plots, FUN_conv_plots.R, and perform a small study to demonstrate how the MAR procedure was implemented, FUN_MAR_procedure. 
 
