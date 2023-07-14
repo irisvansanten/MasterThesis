@@ -15,7 +15,7 @@ The whole thesis is coded with R.
 The simulation study was coded in one script, MAIN_MILC.R, with support of another script, FUN_help, that contains additional functions. Another two script were coded to obtain convergences plots, FUN_conv_plots.R, and perform a small study to demonstrate how the MAR procedure was implemented, FUN_MAR_procedure. 
 
 ## Application
-The application was coded in one script called MIL_application. 
+The application was coded in one script called MILC_application. 
 
 # Contact
 For any questions e-mail: irisvsanten@gmail.com . 
