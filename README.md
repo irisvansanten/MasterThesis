@@ -10,7 +10,7 @@ This repository provides R-code to replicate the simulation study and R-code use
 
 
 ## Simulation Study
-The simulation study was coded in one script, MAIN_MILC_simulation_study.R, with support of another script, FUN_help, that contains additional functions. The MAIN_MILC_simulation_study.R has to be runned once to obtain all results. Another R script contained code to obtain convergences plots, FUN_conv_plots.R, to check convergence. The last R script, FUN_SC_CV, performs a small study to calculate scaled probabilities and Cramér's V. 
+The simulation study was coded in one script, MAIN_MILC_simulation_study.R, with support of another script, FUN_help, that contains additional functions. The MAIN_MILC_simulation_study.R has to be runned once to obtain all results. Another R script contained code to obtain convergences plots, FUN_conv_plots.R, to check convergence. The last R script, FUN_SC_CV.R, performs a small study to calculate scaled probabilities and Cramér's V. 
 
 ## Application
 The application was coded in one script called MAIN_MILC_application. The data set is not publicly available.
