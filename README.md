@@ -1,7 +1,7 @@
 # Master Thesis
 Title: How does missing data affect measurement error estimation in composite data sets when using MILC method
 Performed by:  Iris van Santen  
-Supervised by: Ton de Waal and An-Chiao Lio  
+Supervised by: Ton de Waal and An-Chiao Liu  
 Study:         Statistics and Data Science  
 Institution:   Leiden University 
 
